@@ -1,50 +1,40 @@
 const notifications = {
-    messages: [
-      { text: 'Message 1' },
-      { text: 'Message 2' },
-    ],
-    alerts: [
-      { text: 'Alert 1' },
-      { text: 'Alert 2' },
-    ],
-  };
-  
-  function flattenObject(obj) {
-    const result = [];
-  
-    for (const key in obj) {
-      if (Array.isArray(obj[key])) {
-        result.push(...obj[key]);
-      } else if (typeof obj[key] === 'object') {
-        result.push(...flattenObject(obj[key]));
-      }
-    }
-  
-    return result;
-  }
-  
-  const flatNotifications = flattenObject(notifications);
-  
-  function createFlatIterator(arr) {
-    let index = 0;
-  
-    return {
-      next: function () {
-        if (index < arr.length) {
-          return { value: arr[index++], done: false };
-        } else {
-          return { done: true };
+  facebook: [
+    { text: 'Alice', source: 'facebook', date: '19/09/2023' },
+    { text: 'Bob', source: 'facebook', date: '19/09/2023' }
+  ],
+  telegram: [{ text: 'Charlie', source: 'telegram', date: '19/09/2023' }]
+};
+
+notifications[Symbol.iterator] = function () {
+  const sources = Object.values(this);
+  let sourceIndex = 0;
+  let itemIndex = 0;
+
+  return {
+    next: function () {
+      while (sourceIndex < sources.length) {
+        const source = sources[sourceIndex];
+
+        if (itemIndex < source.length) {
+          return {
+            value: source[itemIndex++],
+            done: false
+          };
         }
-      },
-      [Symbol.iterator]: function () {
-        return this;
-      },
-    };
-  }
-  
-  const flatIterator = createFlatIterator(flatNotifications);
-  
-  for (const item of flatIterator) {
-    console.log(item.text);
-  }
-  
+
+        sourceIndex++;
+        itemIndex = 0;
+      }
+
+      return {
+        value: undefined,
+        done: true
+      };
+    }
+  };
+};
+
+for (const notification of notifications) {
+  console.log(notification);
+}
